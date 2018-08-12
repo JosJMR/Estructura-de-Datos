@@ -1,41 +1,81 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct nodo{
+typedef struct Nodo;
+
+struct Nodo{
     int dato;
-    struct nodo * siguiente
+    struct Nodo *siguiente;
 };
-struct nodo * inicio = NULL;
-#define Nodo struct nodo;
-void insertarOdenado(int);
+
+void insertarElementoOrdenado(struct Nodo **array, int dato);
+void intercambiaElementos(struct Nodo **elemento1, struct Nodo **elemento2);
+struct Nodo *getNodoAProcesar(struct Nodo *array, int dato);
+void arrayToString(struct Nodo *array);
+struct Nodo * nuevoNodo(int dato);
 
 int main(){
-    insertarOrdenado(3);
-    insertarOrdenado(4);
-    insertarOrdenado(7);
-    insertarOrdenado(2);
+    struct Nodo *arreglo = NULL;
+    insertarElementoOrdenado(&arreglo, 10);
+    insertarElementoOrdenado(&arreglo, 7);
+    insertarElementoOrdenado(&arreglo, 4);
+    insertarElementoOrdenado(&arreglo, 2);
+    insertarElementoOrdenado(&arreglo, 1);
+    insertarElementoOrdenado(&arreglo, 3);
+
+    arrayToString(arreglo);
 }
 
-void insertarOrdenado(int dato){
-   Nodo *nuevo = nuevo(dato);
-   Nodo *aux = inicio;
-   Nodo *ant = NULL;
-   while((aux!=NULL)&&(aux->dato<dato)){
-       ant=aux;
-       aux = aux->siguiente;
-   }
-   if(ant == NULL){
-       nuevo->siguiente = inicio;
-       inicio=nuevo;
-   }else {
-       ant->siguiente = nuevo;
-       nuevo->siguiente = aux;
-   }
+void insertarElementoOrdenado(struct Nodo **array, int dato){
+    if (*array == NULL) {
+        *array = nuevoNodo(dato);
+        return;
+    }
+    struct Nodo *nuevoElemento = nuevoNodo(dato);
+    struct Nodo *nodoProcesado = getNodoAProcesar(*array, dato);
+
+    if(nodoProcesado->dato > dato) {
+        if(nodoProcesado == *array) { *array = nuevoElemento; }
+        intercambiaElementos(&nodoProcesado, &nuevoElemento);
+    } else if(nodoProcesado->siguiente != NULL && nodoProcesado->siguiente->dato > dato) {
+        intercambiaElementos(&nodoProcesado->siguiente, &nuevoElemento);
+    } else {
+        nodoProcesado->siguiente = nuevoElemento;
+    }
 }
 
-Nodo *nuevo(int dato){
-    Nodo *nuevo = (Nodo *)malloc(sizeof(nodo));
+struct Nodo *getNodoAProcesar(struct Nodo *array, int dato) {
+    struct Nodo *nodoProcesado = array;
+    
+    while(nodoProcesado->siguiente != NULL && nodoProcesado->dato < dato && nodoProcesado->siguiente->dato < dato) {
+        nodoProcesado = nodoProcesado->siguiente;
+    }
+
+    return nodoProcesado;
+}
+
+void intercambiaElementos(struct Nodo **elemento1, struct Nodo **elemento2) {
+    struct Nodo *aux = *elemento1;
+
+    *elemento1 = *elemento2;
+    (*elemento1)->siguiente = aux;
+}
+
+struct Nodo * nuevoNodo(int dato){
+    struct Nodo *nuevo = (struct Nodo *)malloc(sizeof(struct Nodo));
+
     nuevo->dato=dato;
     nuevo->siguiente=NULL;
+
     return nuevo;
+}
+
+void arrayToString(struct Nodo * array) {
+    struct Nodo * nodoProcesado = array;
+    printf("[");
+    while(nodoProcesado->siguiente != NULL) {
+        printf("%d, ", nodoProcesado->dato);
+        nodoProcesado = nodoProcesado->siguiente;
+    }
+    printf("%d]", nodoProcesado->dato);
 }
